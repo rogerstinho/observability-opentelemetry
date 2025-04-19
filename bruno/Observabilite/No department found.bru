@@ -1,0 +1,15 @@
+meta {
+  name: No department found
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:8081/department/999
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 500
+}

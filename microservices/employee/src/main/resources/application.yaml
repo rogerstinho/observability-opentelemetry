@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: employee-service
+
+server:
+  port: 8082
+
+clients:
+  services:
+    bank-account-service:
+      url: http://localhost:8083

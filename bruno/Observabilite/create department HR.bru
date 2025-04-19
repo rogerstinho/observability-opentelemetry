@@ -1,0 +1,22 @@
+meta {
+  name: create department HR
+  type: http
+  seq: 3
+}
+
+put {
+  url: http://localhost:8081/department
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "id": 2,
+    "name": "HR"
+  }
+}
+
+assert {
+  res.status: eq 200
+}

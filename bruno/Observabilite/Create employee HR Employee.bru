@@ -1,0 +1,23 @@
+meta {
+  name: Create employee HR Employee
+  type: http
+  seq: 8
+}
+
+post {
+  url: http://localhost:8082/employee
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "id": 2,
+    "departmentId": 2,
+    "name": "HR manager"
+  }
+}
+
+assert {
+  res.status: eq 200
+}
