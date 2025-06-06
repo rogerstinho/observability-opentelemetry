@@ -1,20 +1,13 @@
 meta {
-  name: create department HR
+  name: All departments
   type: http
-  seq: 5
+  seq: 4
 }
 
-put {
+get {
   url: http://localhost:8081/department
-  body: json
+  body: none
   auth: none
-}
-
-body:json {
-  {
-    "id": 2,
-    "name": "HR"
-  }
 }
 
 assert {

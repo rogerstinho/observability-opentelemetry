@@ -1,29 +1,22 @@
 spring:
   application:
-    name: department-service
-  datasource:
-    url: jdbc:h2:mem:departmentdb
-    username: test
-    password: test
-    driver-class-name: org.h2.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
+    name: payroll-service
   kafka:
     template:
       observation-enabled: true
     bootstrap-servers: localhost:19092
     producer:
       topic: payroll-topic
-
-
+    consumer:
+      topic: payroll-topic
+      group-id: payroll-group-id
+      retry:
+        max-attempts: 3
+    listener:
+      observation-enabled: true
 
 server:
-  port: 8081
-  load:
-    threads:
-      delay: 5000
+  port: 8084
 
 management:
   server:
@@ -35,7 +28,5 @@ management:
 
 clients:
   services:
-    employee-service:
-      url: http://localhost:8082
     bank-account-service:
       url: http://localhost:8083

@@ -19,6 +19,7 @@
         <module>microservices/department</module>
         <module>microservices/employee</module>
         <module>microservices/bank-account</module>
+        <module>microservices/payroll</module>
     </modules>
 
     <properties>

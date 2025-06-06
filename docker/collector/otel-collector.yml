@@ -2,6 +2,17 @@ receivers:
   otlp:
     protocols:
       grpc:
+#  httpcheck:
+#    targets:
+#      - endpoint: http://department-service:9000/actuator/health
+#        method: GET
+#      - endpoint: http://employee-service:9000/actuator/health
+#        method: GET
+#      - endpoint: http://bank-account-service:9000/actuator/health
+#        method: GET
+#      - endpoint: http://payroll-service:9000/actuator/health
+#        method: GET
+#    collection_interval: 60s
 
 processors:
   # batch metrics before sending to reduce API usage
@@ -35,7 +46,13 @@ exporters:
   loki:
     endpoint: "http://loki:3100/loki/api/v1/push"
 
+extensions:
+  health_check:
+  pprof:
+  zpages:
+
 service:
+  extensions: [health_check, pprof, zpages]
   pipelines:
     metrics:
       receivers: [ otlp ]

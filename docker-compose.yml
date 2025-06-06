@@ -1,4 +1,24 @@
 services:
+  department-postgresql:
+    image: postgres:14
+#    hostname: postgresql
+    volumes:
+      - pg_data_department:/var/lib/postgresql/data
+    environment:
+      PGDATA: "/var/lib/postgresql/data"
+#      PGUSER: "user"
+      POSTGRES_DB: "departmentdb"
+      POSTGRES_USER: "user"
+      POSTGRES_PASSWORD: "change_me"
+      POSTGRES_HOST_AUTH_METHOD: "scram-sha-256"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - service_network
+
   department-service:
     image: department
     container_name: department-service
@@ -7,11 +27,20 @@ services:
       dockerfile: microservices/department/Dockerfile
     ports:
       - "8081:8080"
+      - "9000"
     networks:
       - service_network
     environment:
       - SPRING_PROFILES_ACTIVE=TEST
       - SERVER_PORT=8080
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://department-postgresql:5432/departmentdb
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=change_me
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+
+      - SPRING_KAFKA_TEMPLATE_OBSERVATION_ENABLED=true
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=http://redpanda-0:9092
+      - SPRING_KAFKA_PRODUCER_TOPIC=payroll-topic
 
       - CLIENTS_SERVICES_EMPLOYEE_SERVICE_URL=http://employee-service:8080
       - CLIENTS_SERVICES_BANK_ACCOUNT_SERVICE_URL=http://bank-account-service:8080
@@ -21,8 +50,13 @@ services:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://collector:4317
       - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
       - OTEL_INSTRUMENTATION_MICROMETER_ENABLED=true
+
+      - SERVER_TOMCAT_THREADS_MAX=5
+      - SERVER_LOAD_THREADS_DELAY=2000
+      - SPRING_THREADS_VIRTUAL_ENABLED=false
     depends_on:
       - employee-service
+      - department-postgresql
 
   employee-service:
     image: employee
@@ -32,6 +66,7 @@ services:
       dockerfile: microservices/employee/Dockerfile
     ports:
       - "8082:8080"
+      - "9000"
     networks:
       - service_network
     environment:
@@ -54,6 +89,7 @@ services:
       dockerfile: microservices/bank-account/Dockerfile
     ports:
       - "8083:8080"
+      - "9000"
     networks:
       - service_network
     environment:
@@ -67,6 +103,42 @@ services:
       - OTEL_INSTRUMENTATION_MICROMETER_ENABLED=true
     depends_on:
       - employee-service
+
+  payroll-service:
+    image: payroll
+    container_name: payroll-service
+    build:
+      context: ./
+      dockerfile: microservices/payroll/Dockerfile
+    ports:
+      - "8084:8080"
+      - "9000"
+    networks:
+      - service_network
+    environment:
+      - SPRING_PROFILES_ACTIVE=TEST
+      - SERVER_PORT=8080
+
+      - SPRING_KAFKA_TEMPLATE_OBSERVATION_ENABLED=true
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=http://redpanda-0:9092
+      - SPRING_KAFKA_PRODUCER_TOPIC=payroll-topic
+      - SPRING_KAFKA_CONSUMER_TOPIC=payroll-topic
+      - SPRING_KAFKA_CONSUMER_GROUP_ID=payroll-group-id
+      - SPRING_KAFKA_CONSUMER_RETRY_MAX_ATTEMPTS=1
+      - SPRING_KAFKA_LISTENER_OBSERVATION_ENABLED=true
+
+      - CLIENTS_SERVICES_BANK_ACCOUNT_SERVICE_URL=http://bank-account-service:8080
+
+      - OTEL_SDK_DISABLED=false
+      - OTEL_SERVICE_NAME=payroll-service
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://collector:4317
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+      - OTEL_INSTRUMENTATION_MICROMETER_ENABLED=true
+    depends_on:
+      - bank-account-service
+
+volumes:
+    pg_data_department: {}
 
 networks:
   service_network:

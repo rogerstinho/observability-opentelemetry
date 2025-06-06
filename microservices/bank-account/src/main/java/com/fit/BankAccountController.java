@@ -25,10 +25,10 @@ public class BankAccountController {
         return repository.findByEmployeeId(employeeId);
     }
 
-    @PostMapping("/credit/{employeeId}")
-    public void creditEmployeeAccount(@PathVariable Long employeeId) {
+    @PostMapping("/credit/{bankAccountNumber}")
+    public void creditBankAccount(@PathVariable String bankAccountNumber) {
         // Logic to credit the employee's account
-        BankAccount bankAccount = repository.findByEmployeeId(employeeId);
+        BankAccount bankAccount = repository.findByNumber(bankAccountNumber);
         log.info("Crediting account for employeeId: {}", bankAccount);
     }
 

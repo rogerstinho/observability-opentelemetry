@@ -29,4 +29,10 @@ public class BankAccountRepository {
         return bankAccounts.stream().filter(a -> a.employeeId().equals(id)).
                 findFirst().orElse(null);
     }
+
+    public BankAccount findByNumber(String number) {
+        return bankAccounts.stream().filter(a -> a.number().equals(number)).
+                findFirst().orElseThrow(() ->
+                        new IllegalArgumentException("Bank account not found for number: " + number));
+    }
 }
