@@ -2,6 +2,7 @@ receivers:
   otlp:
     protocols:
       grpc:
+      http:
 #  httpcheck:
 #    targets:
 #      - endpoint: http://department-service:9000/actuator/health
