@@ -88,9 +88,9 @@ public class DepartmentController {
     @PostMapping("/salary/pay/all")
     public void payAllEmployeeSalary() {
         for (Department department : repository.findAll()) {
-            List<Department.Employee> employees = employeeClient.findByDepartment(department.getId());
-            for (Department.Employee employee : employees) {
-                payEmployeeSalary(employee.id());
+            List<Long> employeeIds = employeeClient.findByDepartment(department.getId());
+            for (Long employeeId : employeeIds) {
+                payEmployeeSalary(employeeId);
             }
         }
     }

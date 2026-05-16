@@ -1,11 +1,10 @@
 package com.fit.messaging;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fit.clients.BankAccountClient;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 @Component
 public class PayrollMessageConsumerListener {
@@ -24,7 +23,7 @@ public class PayrollMessageConsumerListener {
     @RetryableTopic(
             attempts = "${spring.kafka.consumer.retry.max-attempts}"
     )
-    public void listen(String message) throws JsonProcessingException {
+    public void listen(String message)  {
         PayrollMessage payrollMessage = objectMapper.readValue(message, PayrollMessage.class);
 
         System.out.println(payrollMessage);
