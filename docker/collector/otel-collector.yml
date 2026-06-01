@@ -3,6 +3,17 @@ receivers:
     protocols:
       grpc:
       http:
+        # Required so browser-based apps (the Angular SPA on :4200) can POST
+        # OTLP/HTTP. Without CORS the browser blocks the request (405 / no
+        # Access-Control-Allow-Origin) and no data reaches the collector.
+        cors:
+          allowed_origins:
+            - "http://localhost:4200"
+            - "http://localhost:*"
+            - "http://127.0.0.1:*"
+          allowed_headers:
+            - "*"
+          max_age: 7200
 #  httpcheck:
 #    targets:
 #      - endpoint: http://department-service:9000/actuator/health
@@ -47,6 +58,11 @@ exporters:
   loki:
     endpoint: "http://loki:3100/loki/api/v1/push"
 
+  # Temporary: prints received telemetry to the collector log so you can confirm
+  # the SPA data is arriving (`podman logs otel-collector`). Remove once verified.
+  debug:
+    verbosity: detailed
+
 extensions:
   health_check:
   pprof:
@@ -58,12 +74,12 @@ service:
     metrics:
       receivers: [ otlp ]
       processors: [ batch ]
-      exporters: [ prometheusremotewrite ]
+      exporters: [ prometheusremotewrite, debug ]
     traces:
       receivers: [ otlp ]
       processors: [ batch ]
-      exporters: [ otlp/jaeger,zipkin,otlp/tempo ]
+      exporters: [ otlp/jaeger,zipkin,otlp/tempo, debug ]
     logs:
       receivers: [ otlp ]
       processors: [ batch ]
-      exporters: [ loki ]
+      exporters: [ loki, debug ]
